@@ -9,7 +9,7 @@ const decorator = decreator((target, key, descriptor, options) => {
 
 	Object.defineProperty(target, key, {
 		value: function () {
-			return func() + '-' + (value || 'decorated');
+			return func.apply(this, arguments) + '-' + (value || 'decorated');
 		}
 	});
 
@@ -21,7 +21,7 @@ const uppercase = decreator((target, key) => {
 
 	Object.defineProperty(target, key, {
 		value: function () {
-			const value = func();
+			const value = func.apply(this, arguments);
 
 			return typeof value === 'string' ? value.toUpperCase() : value;
 		}
@@ -30,6 +30,10 @@ const uppercase = decreator((target, key) => {
 });
 
 class InstanceDecorator {
+	constructor() {
+		this.scope = 'scope';
+	}
+
 	property = 'normal';
 
 	@decorator
@@ -51,6 +55,11 @@ class InstanceDecorator {
 	@decorator
 	methodDecorated () {
 		return 'normal';
+	}
+
+	@decorator
+	methodDecoratedHasScope () {
+		return this.scope;
 	}
 }
 
@@ -118,6 +127,7 @@ describe('Class Methods', () => {
 		expect(instanceDecorator.methodDecorated()).toBe('normal-decorated');
 		expect(instanceDecorator.getter).toBe('normal');
 		expect(instanceDecorator.property).toBe('normal');
+		expect(instanceDecorator.methodDecoratedHasScope()).toBe('scope-decorated');
 	});
 
 	it('can use class decorators with args', () => {

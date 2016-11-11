@@ -9,7 +9,7 @@ const decorator = decreator((target, key, descriptor, options) => {
 
 	Object.defineProperty(target, key, {
 		value: function () {
-			return func() + '-' + (value || 'decorated');
+			return func.apply(this, arguments) + '-' + (value || 'decorated');
 		}
 	});
 
@@ -21,13 +21,14 @@ const uppercase = decreator((target, key) => {
 
 	Object.defineProperty(target, key, {
 		value: function () {
-			const value = func();
+			const value = func.apply(this, arguments);
 
 			return typeof value === 'string' ? value.toUpperCase() : value;
 		}
 	});
     return target;
 });
+
 
 @decorator
 class ClassDecorator {
